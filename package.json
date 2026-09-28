@@ -1,0 +1,20 @@
+{
+  "name": "yogo-pet-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node plugins/yogo-pet/scripts/server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "devices": "node plugins/yogo-pet/scripts/cli.mjs devices",
+    "desktop:dev": "node scripts/desktop.mjs --dev",
+    "desktop:build": "node scripts/desktop.mjs",
+    "test:native": "cargo test -p yogo-core -p yogo-pet-hook"
+  },
+  "dependencies": {
+    "node-hid": "3.2.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.5"
+  }
+}

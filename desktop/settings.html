@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YOGO Pet 设置</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="preferences-shell">
+<header class="page-heading"><h1>设置</h1></header>
+<div id="settings-message" class="message" role="status" hidden></div>
+<form id="preferences-form"><section class="group settings-group"><div class="setting-row"><div><label for="auto-connect">打开应用时自动连接</label></div><input id="auto-connect" type="checkbox" class="checkbox-switch"></div><div class="setting-row"><div><label for="completed-seconds">完成图标停留时间</label></div><div class="number-field"><input id="completed-seconds" type="number" min="2" max="60" value="8" required><span>秒</span></div></div></section><div class="save-row"><span id="dirty-label" class="tiny">设置已保存</span><button id="save" class="primary" type="submit" disabled>保存设置</button></div></form>
+</main><script src="window-actions.js"></script><script src="settings.js"></script></body></html>

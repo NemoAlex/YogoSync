@@ -1,0 +1,8 @@
+[package]
+name = "yogo-pet-hook"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+yogo-core = { path = "../yogo-core" }
+serde_json = "1"

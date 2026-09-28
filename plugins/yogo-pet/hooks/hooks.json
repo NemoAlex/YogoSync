@@ -1,0 +1,109 @@
+{
+  "description": "将任务事件转换为本机 YOGO 点阵状态；不保存正文，不控制任务流程。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：会话开始时初始化待机状态"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：收到消息时显示思考图标"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：调用工具时显示执行图标"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：工具结束后更新思考或执行状态"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：需要授权时显示等待确认图标"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：本轮回复完成时显示完成图标"
+          }
+        ]
+      }
+    ],
+    "Interrupt": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：任务被打断时显示中断图标"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/hook.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%/scripts/hook.mjs\"",
+            "timeout": 3,
+            "statusMessage": "YOGO：会话结束时清除该任务状态"
+          }
+        ]
+      }
+    ]
+  }
+}

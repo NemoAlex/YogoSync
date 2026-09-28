@@ -1,0 +1,1 @@
+{ "identifier": "default", "description": "本地状态及设置窗口", "windows": ["main", "settings", "themes"], "permissions": ["core:default"] }

@@ -1,0 +1,17 @@
+{
+  "name": "yogo-pet",
+  "version": "1.0.0",
+  "description": "通过原生事件助手，在 YOGO 点阵屏显示 Codex 任务状态",
+  "author": {
+    "name": "Local developer"
+  },
+  "interface": {
+    "displayName": "YOGO Pet",
+    "shortDescription": "让键盘上的像素伙伴随 Codex 任务变化。",
+    "longDescription": "通过本地 Hooks 接收任务状态，并由本地控制程序切换 YOGO 75 PRO 接收器的点阵图标。",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "帮我启动并检查 YOGO Pet。"
+  }
+}

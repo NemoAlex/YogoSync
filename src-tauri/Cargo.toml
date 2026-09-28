@@ -1,0 +1,19 @@
+[package]
+name = "yogo-pet-desktop"
+version = "1.0.0"
+edition = "2021"
+default-run = "yogo-pet-desktop"
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+tauri = { version = "2.11", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2.4"
+yogo-core = { path = "../crates/yogo-core" }
+serde_json = "1"
+rfd = "0.16"
+uuid = { version = "1", features = ["v4"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

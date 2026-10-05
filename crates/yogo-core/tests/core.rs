@@ -20,7 +20,7 @@ fn temp() -> std::path::PathBuf {
     std::env::temp_dir().join(format!("yogo-test-{}", uuid::Uuid::new_v4()))
 }
 #[test]
-fn native_protocol_matches_hardware_verified_js() {
+fn native_protocol_matches_hardware_verified_fixtures() {
     let fixtures: serde_json::Value = serde_json::from_str(include_str!("fixtures.json")).unwrap();
     for state in [
         PetState::Idle,

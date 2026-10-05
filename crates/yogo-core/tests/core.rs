@@ -214,3 +214,45 @@ fn custom_mode_recovers_to_visible_preset_without_touching_other_settings() {
     original[6] = 7;
     assert_eq!(recovery_target(&original), original);
 }
+
+#[test]
+fn usb_and_receiver_detection_excludes_other_interfaces_and_models() {
+    use yogo_core::protocol::*;
+    assert_eq!(
+        Connection::detect(VID, USB_PID, USAGE_PAGE, USAGE),
+        Some(Connection::Usb)
+    );
+    assert_eq!(
+        Connection::detect(VID, PID, USAGE_PAGE, USAGE),
+        Some(Connection::Receiver)
+    );
+    assert_eq!(Connection::detect(VID, USB_PID, 1, 6), None);
+    assert_eq!(Connection::detect(14000, 12292, 1, 6), None);
+    assert_eq!(Connection::detect(VID, 4508, USAGE_PAGE, USAGE), None);
+    let dir = temp();
+    std::fs::create_dir_all(&dir).unwrap();
+    assert!(!recovery_pending(&dir));
+    std::fs::write(dir.join(Connection::Usb.backup_file()), "{}").unwrap();
+    assert!(recovery_pending(&dir));
+    assert_ne!(
+        Connection::Usb.backup_file(),
+        Connection::Receiver.backup_file()
+    );
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn wired_protocol_matches_captured_usb_handshake_and_rgb_chunks() {
+    use yogo_core::protocol::*;
+    let packet = transport_packet(0x10, 0, 0, &[], 4321, 64).unwrap();
+    assert_eq!(packet.len(), 64);
+    assert_eq!(&packet[..8], &[0xaa, 0x10, 0, 0, 0, 0xe1, 0x10, 0]);
+    assert!(packet[8..].iter().all(|b| *b == 0));
+    let rgb = (0..108).collect::<Vec<u8>>();
+    let first = transport_packet(0x3b, 0, 56, &rgb[..56], 1, 64).unwrap();
+    let last = transport_packet(0x3b, 56, 56, &rgb[56..], 2, 64).unwrap();
+    assert_eq!([&first[8..], &last[8..60]].concat(), rgb);
+    assert_eq!(&last[60..], &[0; 4]);
+    assert!(transport_packet(0x15, 0, 57, &[], 1, 64).is_err());
+    assert!(transport_packet(0x15, 0, 56, &[], 1, 32).is_err());
+}

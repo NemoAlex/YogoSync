@@ -4,6 +4,7 @@ use crate::{
     device_service::DeviceService,
     events::consume_events,
     now_ms,
+    protocol::recovery_pending,
     task_states::{PetState, TaskSnapshot, TaskStates},
     themes::{Theme, ThemeLibrary, ThemeOption},
 };
@@ -33,6 +34,8 @@ pub struct DesktopSnapshot {
     pub phase: String,
     pub error: String,
     pub model: String,
+    pub connection: String,
+    pub enabled: bool,
     pub preferences: Preferences,
     pub tasks: TaskSnapshot,
     pub state: PetState,
@@ -78,6 +81,7 @@ struct Worker {
     themes: ThemeLibrary,
     animation_start: Instant,
     next_frame: Instant,
+    next_connection_check: Instant,
     on_change: Box<dyn Fn(DesktopSnapshot) + Send>,
     _lock: File,
 }
@@ -102,6 +106,8 @@ impl ServiceRuntime {
             phase: "stopped".into(),
             error: String::new(),
             model: String::new(),
+            connection: String::new(),
+            enabled: false,
             preferences,
             tasks: TaskStates::default().snapshot(now_ms(), 8),
             state: PetState::Idle,
@@ -113,7 +119,7 @@ impl ServiceRuntime {
             demo: false,
             logs: vec![],
             data_dir: store.dir.display().to_string(),
-            recovery_pending: store.dir.join("device-backup.json").exists(),
+            recovery_pending: recovery_pending(&store.dir),
         };
         let snapshot = Arc::new(Mutex::new(local.clone()));
         let (sender, receiver) = mpsc::channel();
@@ -128,6 +134,7 @@ impl ServiceRuntime {
             themes,
             animation_start: Instant::now(),
             next_frame: Instant::now(),
+            next_connection_check: Instant::now(),
             on_change: Box::new(on_change),
             _lock: lock,
         };
@@ -195,7 +202,7 @@ impl Worker {
         self.local.active_theme_id = self.themes.active_id.clone();
         self.local.theme_options = self.themes.options();
         self.local.theme_previews = self.themes.active().previews();
-        self.local.recovery_pending = self.store.dir.join("device-backup.json").exists();
+        self.local.recovery_pending = recovery_pending(&self.store.dir);
         let mut shared = self.snapshot.lock().unwrap();
         if *shared != self.local {
             *shared = self.local.clone();
@@ -204,11 +211,12 @@ impl Worker {
         }
     }
     fn start(&mut self) -> Result<(), String> {
+        self.local.enabled = true;
+        self.next_connection_check = Instant::now() + Duration::from_secs(5);
         if self.device.is_some() {
             return Ok(());
         }
         self.local.phase = "starting".into();
-        self.local.error.clear();
         self.publish();
         let mut d = DeviceService::open(self.store.dir.clone())?;
         if let Err(e) = d.begin() {
@@ -218,37 +226,53 @@ impl Worker {
                 Err(r) => format!("{e}；恢复待重试：{r}"),
             });
         }
+        self.local.error.clear();
+        self.local.connection = d.connection.label().into();
         self.local.model = d.model.clone();
         self.device = Some(d);
         self.last_frame = None;
         self.animation_start = Instant::now();
         self.local.phase = "running".into();
-        self.record("success", "接收器已连接，原灯效已备份");
+        self.record("success", "键盘已连接，原灯效已备份");
         Ok(())
     }
     fn stop(&mut self) -> Result<(), String> {
+        self.local.enabled = false;
         self.local.phase = "stopping".into();
         self.publish();
         if let Some(mut d) = self.device.take() {
             d.restore()?;
             self.record("info", "已恢复原灯效，设备已断开");
-        } else if self.store.dir.join("device-backup.json").exists() {
+        } else if recovery_pending(&self.store.dir) {
             let mut d = DeviceService::open(self.store.dir.clone())?;
             d.restore()?;
             self.record("success", "已恢复上次中断前的灯效");
         }
         self.local.phase = "stopped".into();
         self.local.model.clear();
+        self.local.connection.clear();
         self.local.error.clear();
         self.last_frame = None;
         Ok(())
     }
     fn fail(&mut self, error: String) {
-        self.local.error = error.clone();
         self.local.phase = "error".into();
-        self.record("error", error);
+        if self.local.error != error {
+            self.local.error = error.clone();
+            self.record("error", error);
+        }
     }
     fn tick(&mut self) -> Result<(), String> {
+        if self.local.enabled && Instant::now() >= self.next_connection_check {
+            self.next_connection_check = Instant::now() + Duration::from_secs(5);
+            if let Some(device) = self.device.as_mut() {
+                // Also probe while a static icon is displayed, so unplugging or
+                // changing the keyboard's mode cannot leave a stale connection.
+                device.check_connection()?;
+            } else {
+                self.start()?;
+            }
+        }
         let now = now_ms();
         // Do not race the earlier Node prototype for the same event spool.
         if !self.store.dir.join("server.lock").exists() {
@@ -366,9 +390,8 @@ impl Worker {
             if let Err(e) = self.tick() {
                 self.device = None;
                 self.local.model.clear();
-                        if self.local.error != e {
-                    self.fail(e)
-                }
+                self.local.connection.clear();
+                self.fail(e);
             }
             self.publish();
         }

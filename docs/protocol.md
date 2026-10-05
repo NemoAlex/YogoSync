@@ -21,7 +21,6 @@ On 2026-09-24: read-only handshake and config read succeeded on physical receive
 
 Codex references:
 https://learn.chatgpt.com/docs/hooks
-https://developers.openai.com/plugins/build/plugins
 
 Custom mode 6 is accepted without pixel backup. Its recovery record stores built-in mode 0 (the first ATK dot preset, star), retaining existing brightness/color unless zero would leave it dark. This is a dot-only fallback, not a factory reset. Recovery is still committed and read back before the record is removed.
 

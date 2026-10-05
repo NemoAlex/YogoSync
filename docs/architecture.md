@@ -22,7 +22,7 @@ Quit waits for restoration; pending records remain available after a failed rest
 
 ## Hooks and settings
 
-The desktop app installs the helper in `$CODEX_HOME/yogosync/bin` and merges user `hooks.json`, preserving unrelated hooks and backing up valid configuration before changes. Authorization remains in Codex. Enabled legacy plugins are detected to prevent duplicate events.
+The desktop app installs the helper in `$CODEX_HOME/yogosync/bin` and merges user `hooks.json`, preserving unrelated hooks and backing up valid configuration before changes. Authorization remains in Codex.
 
 The language setting supports system default, Simplified Chinese, and English. Language changes update every window and native menu without discarding editor drafts. Cover appearance and completion duration are persisted separately from theme pixel content.
 

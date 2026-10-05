@@ -25,7 +25,7 @@ Download the **Apple Silicon DMG** and its `.sha256` file from [GitHub Releases]
 
 Connect the keyboard in USB wired mode or plug in the receiver, then open YogoSync. Click **Configure Hooks**, then follow **Authorize** to grant access. Codex CLI users can authorize through `/hooks`.
 
-Continue any task after authorization; the status changes to **Connected** when an event arrives. If it keeps waiting, restart the client. Disable or uninstall the old YogoSync plugin before configuring Hooks.
+Continue any task after authorization; the status changes to **Connected** when an event arrives. If it keeps waiting, restart the client.
 
 ## Notes
 

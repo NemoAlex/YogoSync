@@ -5148,7 +5148,7 @@ dependencies = [
 
 [[package]]
 name = "yogo-core"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "fs2",
  "hidapi",
@@ -5159,7 +5159,7 @@ dependencies = [
 
 [[package]]
 name = "yogosync-desktop"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "rfd",
  "serde_json",
@@ -5173,7 +5173,7 @@ dependencies = [
 
 [[package]]
 name = "yogosync-hook"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "serde_json",
  "yogo-core",

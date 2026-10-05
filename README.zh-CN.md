@@ -4,6 +4,8 @@
 
 将 ChatGPT / Codex 的任务状态实时显示在 **YOGO 75 PRO 的 6 × 6 RGB 点阵屏**上。支持 **macOS Apple Silicon**，支持 **USB 有线与 2.4 GHz 接收器**，自动识别可用连接。
 
+<img src="docs/images/main-zh-CN.jpg" alt="YogoSync 简体中文主界面" width="410">
+
 ## 功能
 
 - 同步待机、思考、执行、等待确认、完成和中断六种状态，多任务优先显示等待确认和执行状态。

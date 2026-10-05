@@ -4,6 +4,8 @@
 
 Display ChatGPT / Codex task states on the **YOGO 75 PRO's 6 × 6 RGB matrix**. Supports **macOS Apple Silicon** via **USB wired mode or the 2.4 GHz receiver**, selected automatically.
 
+<img src="docs/images/main-en.jpg" alt="YogoSync main window in English" width="410">
+
 ## Features
 
 - Six task states: idle, thinking, working, awaiting approval, done, and interrupted. Approval and active work take priority across concurrent tasks.

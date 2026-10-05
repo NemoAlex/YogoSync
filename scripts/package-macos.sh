@@ -16,6 +16,8 @@ fi
 codesign --verify --deep --strict "$STAGE/YogoSync.app"
 cp README.md "$STAGE/README.md"
 cp README.zh-CN.md "$STAGE/README.zh-CN.md"
+mkdir -p "$STAGE/docs/images"
+cp docs/images/main-en.jpg docs/images/main-zh-CN.jpg "$STAGE/docs/images/"
 ln -sfn /Applications "$STAGE/Applications"
 hdiutil create -volname 'YogoSync' -srcfolder "$STAGE" -format UDZO -ov "$DMG"
 (cd dist && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")

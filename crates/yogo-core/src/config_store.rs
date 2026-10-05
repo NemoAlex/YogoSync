@@ -4,13 +4,13 @@ use std::{fs, path::PathBuf};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct Preferences {
-    pub auto_connect: bool,
+    pub preview_cover: String,
     pub completed_seconds: u64,
 }
 impl Default for Preferences {
     fn default() -> Self {
         Self {
-            auto_connect: false,
+            preview_cover: "black".into(),
             completed_seconds: 8,
         }
     }
@@ -37,6 +37,9 @@ impl ConfigStore {
         }
     }
     pub fn validate(p: &Preferences) -> Result<(), String> {
+        if !["black", "white", "yellow"].contains(&p.preview_cover.as_str()) {
+            return Err("屏罩颜色无效".into());
+        }
         if !(2..=60).contains(&p.completed_seconds) {
             Err("完成图标停留时间应为 2–60 秒".into())
         } else {
@@ -52,11 +55,11 @@ impl ConfigStore {
     }
 }
 pub fn data_dir() -> PathBuf {
-    if let Some(p) = std::env::var_os("YOGO_PET_HOME") {
+    if let Some(p) = std::env::var_os("YOGOSYNC_HOME") {
         return PathBuf::from(p);
     }
     let home = std::env::var_os("HOME")
         .or_else(|| std::env::var_os("USERPROFILE"))
         .unwrap_or_else(|| ".".into());
-    PathBuf::from(home).join(".local/share/yogo-pet")
+    PathBuf::from(home).join(".local/share/yogosync")
 }

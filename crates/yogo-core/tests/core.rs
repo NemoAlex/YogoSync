@@ -192,3 +192,25 @@ fn other_tool_completion_does_not_clear_pending_permission() {
     t.apply(event("PreToolUse", "a", "t", "2", 11), 11);
     assert_eq!(t.snapshot(11, 8).state, PetState::Working);
 }
+
+#[test]
+fn custom_mode_recovers_to_visible_preset_without_touching_other_settings() {
+    use yogo_core::protocol::{recovery_target, restore_dot};
+    let mut original = [17; 24];
+    original[6] = 6;
+    original[7] = 0;
+    original[11..14].fill(0);
+    let target = recovery_target(&original);
+    assert_eq!(target[5], 0);
+    assert_eq!(target[6], 0);
+    assert_eq!(target[7], 50);
+    assert_eq!(&target[11..14], &[255; 3]);
+    assert_eq!(&target[..5], &original[..5]);
+    assert_eq!(&target[14..], &original[14..]);
+    let mut current = [99; 24];
+    restore_dot(&mut current, &target);
+    assert_eq!(&current[..5], &[99; 5]);
+    assert_eq!(&current[14..], &[99; 10]);
+    original[6] = 7;
+    assert_eq!(recovery_target(&original), original);
+}

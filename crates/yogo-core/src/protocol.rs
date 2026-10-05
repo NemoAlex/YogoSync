@@ -32,3 +32,20 @@ pub fn normalize_reply(data: &[u8]) -> &[u8] {
 pub fn restore_dot(current: &mut [u8; 24], original: &[u8; 24]) {
     current[5..14].copy_from_slice(&original[5..14]);
 }
+
+// Custom pixels cannot be read back. Persist a safe built-in restore target instead.
+// ATK HUB's dot preset list starts with mode 0 (star).
+pub fn recovery_target(original: &[u8; 24]) -> [u8; 24] {
+    let mut target = *original;
+    if target[6] == 6 {
+        target[5] = 0;
+        target[6] = 0;
+        if target[7] == 0 {
+            target[7] = 50;
+        }
+        if target[11..14] == [0, 0, 0] {
+            target[11..14].copy_from_slice(&[255, 255, 255]);
+        }
+    }
+    target
+}

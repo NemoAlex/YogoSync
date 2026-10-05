@@ -1,15 +1,15 @@
 {
-  "name": "yogo-pet-workspace",
+  "name": "yogosync",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node plugins/yogo-pet/scripts/server.mjs",
+    "start": "node plugins/yogosync/scripts/server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "devices": "node plugins/yogo-pet/scripts/cli.mjs devices",
+    "devices": "node plugins/yogosync/scripts/cli.mjs devices",
     "desktop:dev": "node scripts/desktop.mjs --dev",
     "desktop:build": "node scripts/desktop.mjs",
-    "test:native": "cargo test -p yogo-core -p yogo-pet-hook"
+    "test:native": "cargo test -p yogo-core -p yogosync-hook"
   },
   "dependencies": {
     "node-hid": "3.2.0"

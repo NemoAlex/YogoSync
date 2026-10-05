@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TaskStates } from '../plugins/yogo-pet/scripts/state.mjs';
+import { TaskStates } from '../plugins/yogosync/scripts/state.mjs';
 test('one completed task cannot hide another running task',()=>{
  const s=new TaskStates();let at=Date.now();
  const send=(session,event,turn='1')=>s.apply({session,event,turn,at:at++});

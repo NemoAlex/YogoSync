@@ -7,7 +7,7 @@ import { dataDir } from './paths.mjs';
 import { YogoDevice, listDevices } from './device.mjs';
 import { TaskStates } from './state.mjs';
 import { frameFor, states } from './art.mjs';
-const port = Number(process.env.YOGO_PET_PORT || 19775);
+const port = Number(process.env.YOGOSYNC_PORT || 19775);
 const webDir = fileURLToPath(new URL('../web/', import.meta.url));
 const eventsDir = path.join(dataDir,'events');
 await mkdir(eventsDir,{recursive:true,mode:0o700});
@@ -20,7 +20,7 @@ try { const lock=await open(lockPath,'wx',0o600); await lock.writeFile(String(pr
 catch {
   const pid=Number(await readFile(lockPath,'utf8').catch(()=>''));
   let alive=false; try { process.kill(pid,0); alive=true; } catch {}
-  if(alive) throw new Error(`YOGO Pet 已运行 (PID ${pid})`);
+  if(alive) throw new Error(`YogoSync 已运行 (PID ${pid})`);
   await unlink(lockPath).catch(()=>{}); const lock=await open(lockPath,'wx',0o600); await lock.writeFile(String(process.pid)); await lock.close();
 }
 function current() { const s=tasks.snapshot(); return { ...s, state:override?.until>Date.now()?override.state:s.state, demo:override?.until>Date.now(), connected:!!device, model:connectedModel, error, lastEventAt }; }
@@ -90,7 +90,7 @@ const server=http.createServer(async(req,res)=>{
     res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8');res.end(content);
   }catch(e){error=e.message;res.writeHead(409,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));}
 });
-server.listen(port,'127.0.0.1',()=>console.log(`YOGO Pet: http://127.0.0.1:${port}\nData: ${dataDir}`));
+server.listen(port,'127.0.0.1',()=>console.log(`YogoSync: http://127.0.0.1:${port}\nData: ${dataDir}`));
 async function shutdown(){
   if(closing)return;closing=true;clearInterval(poll);
   while(busy)await new Promise(r=>setTimeout(r,100));

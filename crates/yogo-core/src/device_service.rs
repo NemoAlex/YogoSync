@@ -140,14 +140,11 @@ impl DeviceService {
             self.restore()?;
         }
         let original = self.read_dot()?;
-        if original[6] == 6 {
-            return Err("当前已是自定义图案，无法备份。请在 ATK 先选择一个预设灯效".into());
-        }
         let backup = Backup {
             vendor_id: VID,
             product_id: PID,
             serial_number: self.serial.clone(),
-            block: original,
+            block: recovery_target(&original),
         };
         atomic_write(
             &self.backup_path,
@@ -193,7 +190,7 @@ impl DeviceService {
             return Err("恢复备份属于另一台设备，已保留备份".into());
         }
         let mut current = self.read_dot()?;
-        restore_dot(&mut current, &backup.block);
+        restore_dot(&mut current, &recovery_target(&backup.block));
         self.request(0x3d, 0, 0, &[])?;
         self.write_dot(&current)?;
         fs::remove_file(&self.backup_path).map_err(|e| e.to_string())?;

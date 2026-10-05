@@ -168,3 +168,32 @@ fn working_animation_has_balanced_opposing_lights() {
         }
     }
 }
+
+#[test]
+fn preview_cover_persists_and_settings_cannot_overwrite_it() {
+    use yogo_core::config_store::ConfigStore;
+    let dir = std::env::temp_dir().join(format!("yogo-cover-{}", uuid::Uuid::new_v4()));
+    let runtime = ServiceRuntime::spawn(dir.clone(), |_| {}).unwrap();
+    let mut stale_settings = runtime.snapshot().preferences;
+    runtime.set_preview_cover("yellow".into()).unwrap();
+    stale_settings.completed_seconds = 12;
+    runtime.save(stale_settings).unwrap();
+    assert!(runtime.set_preview_cover("invalid".into()).is_err());
+    runtime.shutdown().unwrap();
+    let persisted = ConfigStore::open(dir.clone()).unwrap().load().unwrap();
+    assert_eq!(persisted.preview_cover, "yellow");
+    assert_eq!(persisted.completed_seconds, 12);
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(2);
+    let next = loop {
+        match ServiceRuntime::spawn(dir.clone(), |_| {}) {
+            Ok(r) => break r,
+            Err(_) if std::time::Instant::now() < until => {
+                std::thread::sleep(std::time::Duration::from_millis(10))
+            }
+            Err(e) => panic!("{e}"),
+        }
+    };
+    assert_eq!(next.snapshot().preferences.preview_cover, "yellow");
+    next.shutdown().unwrap();
+    std::fs::remove_dir_all(dir).unwrap();
+}

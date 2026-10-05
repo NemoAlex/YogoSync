@@ -47,10 +47,8 @@ impl Theme {
         let mut states = BTreeMap::new();
         let idle = frame_for(PetState::Idle);
         let mut blink = idle;
-        for y in [1, 2] {
-            for x in [1, 4] {
-                blink[y][x] = [0, 7, 10];
-            }
+        for x in [1, 4] {
+            blink[1][x] = [0; 3];
         }
         states.insert("idle".into(), vec![frame(idle, 2600), frame(blink, 160)]);
         // Alternate the three-dot group by one column to balance its odd width.
@@ -106,10 +104,21 @@ impl Theme {
                 frame(dim(waiting, &[0, 1, 2, 5], 45), 650),
             ],
         );
-        for (key, state) in [
-            ("done", PetState::Done),
-            ("interrupted", PetState::Interrupted),
-        ] {
+        let done = frame_for(PetState::Done);
+        let mut left_wink = done;
+        left_wink[1][1] = [0; 3];
+        let mut right_wink = done;
+        right_wink[1][4] = [0; 3];
+        states.insert(
+            "done".into(),
+            vec![
+                frame(done, 1400),
+                frame(left_wink, 180),
+                frame(done, 500),
+                frame(right_wink, 180),
+            ],
+        );
+        for (key, state) in [("interrupted", PetState::Interrupted)] {
             let pixels = frame_for(state);
             states.insert(
                 key.into(),

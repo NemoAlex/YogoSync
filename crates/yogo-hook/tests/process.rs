@@ -7,8 +7,8 @@ fn actual_hook_binary_is_fail_open_and_filters_sensitive_fields() {
     let dir = std::env::temp_dir().join(format!("yogo-hook-test-{}", std::process::id()));
     let input = r#"{"hook_event_name":"PreToolUse","session_id":"test","tool_use_id":"call","tool_input":{"secret":"SHOULD_NOT_APPEAR"},"prompt":"SHOULD_NOT_APPEAR"}"#;
     for raw in [input, "not json"] {
-        let mut child = Command::new(env!("CARGO_BIN_EXE_yogo-pet-hook"))
-            .env("YOGO_PET_HOME", &dir)
+        let mut child = Command::new(env!("CARGO_BIN_EXE_yogosync-hook"))
+            .env("YOGOSYNC_HOME", &dir)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()

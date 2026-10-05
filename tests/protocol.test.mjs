@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { packet, framePackets, normalizeReply } from '../plugins/yogo-pet/scripts/protocol.mjs';
-import { frameFor } from '../plugins/yogo-pet/scripts/art.mjs';
-import { YogoDevice } from '../plugins/yogo-pet/scripts/device.mjs';
+import { packet, framePackets, normalizeReply } from '../plugins/yogosync/scripts/protocol.mjs';
+import { frameFor } from '../plugins/yogosync/scripts/art.mjs';
+import { YogoDevice } from '../plugins/yogosync/scripts/device.mjs';
 test('ATK 32-byte frame fixture: offsets, LE request IDs, RGB tail padding',()=>{
   let n=0x1233;const f=Array.from({length:6},()=>Array.from({length:6},()=>[1,2,3]));
   const p=framePackets(f,()=>++n);

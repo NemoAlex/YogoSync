@@ -14,5 +14,5 @@ async function refresh(){try{
  $('#connect').disabled=s.connected;$('#disconnect').disabled=!s.connected;$('#error').textContent=s.error;
  $('#events').textContent=s.lastEventAt?`已收到 Codex 事件 · ${new Date(s.lastEventAt).toLocaleTimeString()} · ${s.activeTasks} 个活动任务`:'等待 Codex 事件 · 安装插件并信任 Hooks 后自动同步';
  document.querySelectorAll('[data-state]').forEach(b=>b.classList.toggle('active',b.dataset.state===s.state));
-}catch{$('#error').textContent='本地服务已断开，请重新启动 YOGO Pet';}}
+}catch{$('#error').textContent='本地服务已断开，请重新启动 YogoSync';}}
 await refresh();setInterval(refresh,700);

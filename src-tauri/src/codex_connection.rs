@@ -62,27 +62,33 @@ fn classify(response: &Value) -> Value {
     {
         return status(
             "error",
-            "Codex 插件配置读取失败，请在 Codex 设置中检查 Hooks。",
+            "Codex Hooks 配置读取失败，请在 Codex 设置中检查 Hooks。",
         );
     }
-    let hooks: Vec<_> = entries
+    let all: Vec<_> = entries
         .iter()
         .filter_map(|e| e["hooks"].as_array())
         .flatten()
-        .filter(|h| {
-            h["pluginId"]
-                .as_str()
-                .is_some_and(|id| id.split('@').next() == Some("yogo-pet"))
-        })
         .collect();
-    if hooks.is_empty() {
+    if all.iter().any(|h| {
+        h["pluginId"]
+            .as_str()
+            .is_some_and(|id| id.split('@').next() == Some("yogosync"))
+    }) {
         return status(
-            "missing",
-            "未检测到启用的 YOGO Pet 插件，请先在 Codex 中安装并启用。",
+            "legacy_plugin",
+            "请先在 ChatGPT 的插件设置中停用或卸载 YogoSync，再返回配置 Hooks，避免事件重复触发。",
         );
     }
+    let hooks: Vec<_> = all
+        .into_iter()
+        .filter(|h| super::hooks_setup::owns_hook(h))
+        .collect();
+    if hooks.is_empty() {
+        return status("missing", "点击配置 Hooks，添加 YogoSync 的任务事件。");
+    }
     if hooks.iter().any(|h| h["trustStatus"] == "modified") {
-        return status("modified", "插件事件定义已变更，请重新审阅并授权。");
+        return status("modified", "Hooks 事件定义已变更，请重新审阅并授权。");
     }
     if hooks
         .iter()
@@ -90,13 +96,13 @@ fn classify(response: &Value) -> Value {
     {
         return status(
             "unauthorized",
-            "在 Codex 设置 → Hooks 中，找到 YOGO Pet，审阅并信任待授权的事件。",
+            "在 Codex 设置 → Hooks 中，找到 YogoSync，审阅并信任待授权的事件。",
         );
     }
     if hooks.iter().any(|h| h["enabled"] != true) {
         return status(
             "disabled",
-            "YOGO Pet 的部分 Hooks 已停用，请在 Codex 设置 → Hooks 中启用。",
+            "YogoSync 的部分 Hooks 已停用，请在 Codex 设置 → Hooks 中启用。",
         );
     }
     let expected = [
@@ -117,49 +123,14 @@ fn classify(response: &Value) -> Value {
             .any(|h| !matches!(h["trustStatus"].as_str(), Some("trusted" | "managed")))
     {
         return status(
-            "error",
-            "YOGO Pet 的事件配置不完整或版本不兼容，请更新插件。",
+            "incomplete",
+            "YogoSync 的事件配置不完整，请重新配置 Hooks；若仍有提示，请更新 ChatGPT。",
         );
     }
     status(
         "authorized",
         "已授权。继续任意 Codex 任务即可验证事件连接；若仍无事件，请重启 Codex 后继续原任务。",
     )
-}
-
-fn classify_installation(response: &Value) -> Value {
-    let Some(markets) = response
-        .pointer("/result/marketplaces")
-        .and_then(Value::as_array)
-    else {
-        return status("error", "无法检测插件安装状态，请更新 Codex 后重试。");
-    };
-    if response
-        .pointer("/result/marketplaceLoadErrors")
-        .and_then(Value::as_array)
-        .is_some_and(|v| !v.is_empty())
-    {
-        return status("error", "Codex 插件市场读取失败，请检查 Codex 设置。");
-    }
-    let plugins: Vec<_> = markets
-        .iter()
-        .filter_map(|m| m["plugins"].as_array())
-        .flatten()
-        .filter(|p| p["name"] == "yogo-pet" && p["installed"] == true)
-        .collect();
-    if plugins.iter().any(|p| p["enabled"] == true) {
-        status(
-            "error",
-            "插件已启用，但未加载任务事件。请检查 Codex 的 Hooks 设置或重启 Codex。",
-        )
-    } else if !plugins.is_empty() {
-        status(
-            "plugin_disabled",
-            "YOGO Pet 插件已安装，请在 Codex 插件页启用。",
-        )
-    } else {
-        status("missing", "安装 YOGO Pet 插件以接收任务状态。")
-    }
 }
 
 fn query(cli: PathBuf) -> Result<Value, String> {
@@ -191,7 +162,7 @@ fn query(cli: PathBuf) -> Result<Value, String> {
         }
     });
     let result = (|| {
-        writeln!(input, "{}", json!({"id":1,"method":"initialize","params":{"clientInfo":{"name":"yogo-pet-status","version":env!("CARGO_PKG_VERSION")},"capabilities":{"experimentalApi":true}}})).map_err(|e| e.to_string())?;
+        writeln!(input, "{}", json!({"id":1,"method":"initialize","params":{"clientInfo":{"name":"yogosync-status","version":env!("CARGO_PKG_VERSION")},"capabilities":{"experimentalApi":true}}})).map_err(|e| e.to_string())?;
         let deadline = Instant::now() + Duration::from_secs(12);
         loop {
             let response = rx
@@ -211,19 +182,7 @@ fn query(cli: PathBuf) -> Result<Value, String> {
                     )
                     .map_err(|e| e.to_string())?;
                 }
-                Some(2) => {
-                    let result = classify(&response);
-                    if result["state"] != "missing" {
-                        return Ok(result);
-                    }
-                    writeln!(
-                        input,
-                        "{}",
-                        json!({"id":3,"method":"plugin/installed","params":{}})
-                    )
-                    .map_err(|e| e.to_string())?;
-                }
-                Some(3) => return Ok(classify_installation(&response)),
+                Some(2) => return Ok(classify(&response)),
                 _ => {}
             }
         }
@@ -236,9 +195,19 @@ fn query(cli: PathBuf) -> Result<Value, String> {
 }
 
 impl ConnectionProbe {
+    pub fn invalidate(&self) {
+        if let Ok(mut cache) = self.0.lock() {
+            *cache = None;
+        }
+    }
+    pub fn check_fresh(&self) -> Value {
+        self.invalidate();
+        self.check()
+    }
+
     pub fn check(&self) -> Value {
         let Ok(mut cache) = self.0.lock() else {
-            return status("error", "连接检测暂不可用，请重启 YOGO Pet。");
+            return status("error", "连接检测暂不可用，请重启 YogoSync。");
         };
         if let Some((at, value)) = &*cache {
             if at.elapsed() < Duration::from_secs(5) {
@@ -267,35 +236,11 @@ pub async fn get_codex_connection(
         .map_err(|e| e.to_string())
 }
 
-#[tauri::command]
-pub async fn open_codex_authorization() -> Result<(), String> {
-    // Codex currently supports opening settings, but not a Hooks-specific deep link.
-    // Never write hooks.state or automatically approve trust on the user's behalf.
-    tauri::async_runtime::spawn_blocking(|| open_link("codex://settings"))
-        .await
-        .map_err(|e| e.to_string())?
-}
-
-pub fn open_link(link: &str) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
-    let result = Command::new("open").arg(link).status();
-    #[cfg(windows)]
-    let result = Command::new("explorer.exe").arg(link).status();
-    #[cfg(not(any(target_os = "macos", windows)))]
-    let result = Command::new("xdg-open").arg(link).status();
-    match result {
-        Ok(s) if s.success() => Ok(()),
-        _ => {
-            Err("无法打开 Codex。请手动打开 Codex 设置 → Hooks，审阅并信任 YOGO Pet。".to_string())
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     fn response() -> Value {
-        let hooks: Vec<_> = ["sessionStart", "userPromptSubmit", "preToolUse", "postToolUse", "permissionRequest", "stop", "interrupt", "sessionEnd"].iter().map(|e| json!({"pluginId":"yogo-pet@personal","eventName":e,"enabled":true,"trustStatus":"trusted"})).collect();
+        let hooks: Vec<_> = ["sessionStart", "userPromptSubmit", "preToolUse", "postToolUse", "permissionRequest", "stop", "interrupt", "sessionEnd"].iter().map(|e| json!({"pluginId":null,"command":super::super::hooks_setup::test_command(),"sourcePath":super::super::hooks_setup::config_dir().unwrap().join("hooks.json"),"eventName":e,"enabled":true,"trustStatus":"trusted"})).collect();
         json!({"result":{"data":[{"hooks":hooks,"errors":[]}]}})
     }
     #[test]
@@ -311,22 +256,13 @@ mod tests {
             .as_array_mut()
             .unwrap()
             .remove(3);
-        assert_eq!(classify(&r)["state"], "error");
+        assert_eq!(classify(&r)["state"], "incomplete");
     }
     #[test]
-    fn distinguish_missing_disabled_and_unloaded_plugin() {
-        assert_eq!(
-            classify_installation(&json!({"result":{"marketplaces":[]}}))["state"],
-            "missing"
-        );
-        let mut r = json!({"result":{"marketplaces":[{"plugins":[{"name":"yogo-pet","installed":true,"enabled":false}]}]}});
-        assert_eq!(classify_installation(&r)["state"], "plugin_disabled");
-        r["result"]["marketplaces"][0]["plugins"][0]["enabled"] = json!(true);
-        assert_eq!(classify_installation(&r)["state"], "error");
-        assert_eq!(
-            classify_installation(&json!({"error":{}}))["state"],
-            "error"
-        );
+    fn legacy_plugin_blocks_duplicate_setup() {
+        let mut r = response();
+        r["result"]["data"][0]["hooks"][0]["pluginId"] = json!("yogosync@personal");
+        assert_eq!(classify(&r)["state"], "legacy_plugin");
     }
     #[test]
     fn errors_and_other_plugins_do_not_mean_authorized() {

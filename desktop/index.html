@@ -1,42 +1,43 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YOGO Pet</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="glow.css"><link rel="stylesheet" href="home.css"></head>
+<html lang="en" class="i18n-loading"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YogoSync</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="glow.css"><link rel="stylesheet" href="home.css"></head>
 <body><main class="main-shell">
-  <header class="service-control"><div class="service-summary"><div class="service-title"><span id="service-dot" class="dot"></span><strong id="service-title">服务已停止</strong></div><p id="service-detail">YOGO 75 PRO</p></div><button id="power" class="power-switch" role="switch" aria-checked="false" aria-label="启用点阵服务"><span></span></button></header>
-  <nav class="tabs" aria-label="视图"><button class="tab active" data-tab="status" aria-pressed="true">状态</button><button class="tab" data-tab="logs" aria-pressed="false">日志 <span id="log-count" class="count">0</span></button></nav>
+  <header class="service-control"><div class="service-summary"><div class="service-title"><span id="service-dot" class="dot"></span><strong id="service-title" data-i18n="服务已停止">服务已停止</strong></div><p id="service-detail">YOGO 75 PRO</p></div><button id="power" class="power-switch" role="switch" aria-checked="false" aria-label="启用点阵服务" data-i18n-aria-label="启用点阵服务"><span></span></button></header>
+<section class="codex-connection compact-connection"><div class="connection-line"><strong>ChatGPT</strong><span id="codex-status" class="badge" role="status" aria-live="polite" data-i18n="检测中…">检测中…</span><button id="codex-authorize" class="small-button" hidden data-i18n="前往授权">前往授权</button></div><p id="codex-detail" hidden></p><p id="codex-help" role="status" hidden></p></section>
+  <nav class="tabs" aria-label="视图" data-i18n-aria-label="视图"><button class="tab active" data-tab="status" aria-pressed="true" data-i18n="状态">状态</button><button class="tab" data-tab="logs" aria-pressed="false"><span data-i18n="日志">日志</span> <span id="log-count" class="count">0</span></button></nav>
   <div id="error" class="error-banner" role="alert" hidden></div>
   <section id="status-panel" class="content">
-    <section class="codex-connection compact-connection"><div class="connection-line"><strong>Codex</strong><span id="codex-status" class="badge" role="status" aria-live="polite">检测中…</span><button id="codex-authorize" class="small-button" hidden>前往授权</button></div><p id="codex-detail" hidden></p><p id="codex-help" role="status" hidden></p></section>
-    <section class="home-pet"><header class="home-theme-row"><label for="theme-select">主题</label><select id="theme-select" aria-label="选择主题" disabled></select><span id="mode-badge" class="badge">自动跟随</span></header><p id="theme-error" class="home-theme-error" role="alert" hidden></p>
-      <div class="home-pet-stage"><div id="matrix" class="glow-preview" aria-label="6 × 6 点阵预览"></div><div class="home-pet-caption"><strong id="pet-state">待机</strong><button id="automatic" class="small-button" hidden>恢复自动</button></div></div>
-      <div id="state-previews" class="state-previews" aria-label="主题状态，点击预览 5 秒"></div>
+
+    <section class="home-pet"><header class="home-theme-row"><label for="theme-select" data-i18n="主题">主题</label><select id="theme-select" aria-label="选择主题" data-i18n-aria-label="选择主题" disabled></select><span id="mode-badge" class="badge" data-i18n="自动跟随">自动跟随</span></header><p id="theme-error" class="home-theme-error" role="alert" hidden></p>
+      <div class="home-pet-stage"><div id="matrix" class="glow-preview" aria-label="6 × 6 点阵预览" data-i18n-aria-label="6 × 6 点阵预览"></div><div class="cover-picker" role="group" aria-label="屏罩颜色" data-i18n-aria-label="屏罩颜色"><span data-i18n="屏罩">屏罩</span><button type="button" data-cover="black" aria-pressed="true" data-i18n="黑色">黑色</button><button type="button" data-cover="white" aria-pressed="false" data-i18n="白色">白色</button><button type="button" data-cover="yellow" aria-pressed="false" data-i18n="黄色">黄色</button></div><div class="home-pet-caption"><strong id="pet-state" data-i18n="待机">待机</strong><button id="automatic" class="small-button" hidden data-i18n="恢复自动">恢复自动</button></div></div>
+      <div id="state-previews" class="state-previews" aria-label="主题状态，点击预览 5 秒" data-i18n-aria-label="主题状态，点击预览 5 秒"></div>
     </section>
 
   </section>
-  <section id="logs-panel" class="content logs-content" hidden><div class="logs-toolbar"><button id="clear-logs" class="small-button">清空</button></div><div id="logs" class="logs"></div></section>
-  <footer class="main-footer"><button id="themes">编辑主题…</button><button id="settings">设置…</button></footer>
-</main><script src="window-actions.js"></script><script src="glow.js"></script><script src="app.js"></script><dialog id="authorization-guide" class="authorization-guide" aria-labelledby="authorization-title">
-  <header class="guide-header"><h2 id="authorization-title" tabindex="-1" autofocus>授权 YOGO Pet</h2><button id="guide-close" class="guide-close" aria-label="关闭授权说明">×</button></header>
-  <div class="guide-tabs" role="tablist" aria-label="授权方式">
-    <button id="guide-tab-client" role="tab" aria-controls="guide-panel-client" aria-selected="true">ChatGPT 客户端</button>
+  <section id="logs-panel" class="content logs-content" hidden><div class="logs-toolbar"><button id="clear-logs" class="small-button" data-i18n="清空">清空</button></div><div id="logs" class="logs"></div></section>
+  <footer class="main-footer"><button id="atk-driver"><span data-i18n="ATK 驱动">ATK 驱动</span> ↗</button><button id="themes" data-i18n="编辑主题…">编辑主题…</button><button id="settings" data-i18n="设置…">设置…</button></footer>
+</main><dialog id="authorization-guide" class="authorization-guide" aria-labelledby="authorization-title">
+  <header class="guide-header"><h2 id="authorization-title" tabindex="-1" autofocus data-i18n="授权 YogoSync">授权 YogoSync</h2><button id="guide-close" class="guide-close" aria-label="关闭授权说明" data-i18n-aria-label="关闭授权说明">×</button></header>
+  <div class="guide-tabs" role="tablist" aria-label="授权方式" data-i18n-aria-label="授权方式">
+    <button id="guide-tab-client" role="tab" aria-controls="guide-panel-client" aria-selected="true" data-i18n="ChatGPT 客户端">ChatGPT 客户端</button>
     <button id="guide-tab-cli" role="tab" aria-controls="guide-panel-cli" aria-selected="false" tabindex="-1">CLI</button>
   </div>
   <div class="guide-content">
     <section id="guide-panel-client" role="tabpanel" aria-labelledby="guide-tab-client">
-    <p class="guide-result">任选一种方式，审阅并勾选 YOGO 的事件</p>
-    <section class="guide-method"><h3>方法一：从对话框进入</h3>
-      <figure class="composer-guide"><img src="assets/codex-hook-entry.png" alt="Codex 对话输入框：底部 Approve for me 右侧是带黄色圆点的 Hook 图标"><span class="hook-highlight" aria-hidden="true"></span></figure>
-      <p>在 ChatGPT 客户端中，点击输入框下方带黄点的 <strong>Hook 图标</strong>，打开 Review hooks。</p>
+    <p class="guide-result" data-i18n="任选一种方式，审阅并勾选 YOGO 的事件">任选一种方式，审阅并勾选 YOGO 的事件</p>
+    <section class="guide-method"><h3 data-i18n="方法一：从对话框进入">方法一：从对话框进入</h3>
+      <figure class="composer-guide"><img src="assets/codex-hook-entry.png" alt="Codex 对话输入框：底部 Approve for me 右侧是带黄色圆点的 Hook 图标" data-i18n-alt="Codex 对话输入框：底部 Approve for me 右侧是带黄色圆点的 Hook 图标"><span class="hook-highlight" aria-hidden="true"></span></figure>
+      <p><span data-i18n="在 ChatGPT 客户端中，点击输入框下方带黄点的">在 ChatGPT 客户端中，点击输入框下方带黄点的</span> <strong data-i18n="Hook 图标">Hook 图标</strong><span data-i18n="，打开 Review hooks。">，打开 Review hooks。</span></p>
     </section>
-    <section class="guide-method"><h3>方法二：从设置进入</h3>
-      <div class="settings-guide" role="img" aria-label="设置路径：Settings，Coding，Hooks"><div class="guide-settings-label">⚙ Settings</div><div class="guide-coding-label">Coding</div><div class="guide-hooks-label">⚓ Hooks <span>→</span></div></div>
-      <p>在 ChatGPT 客户端打开 <strong>Settings → Coding → Hooks</strong>，找到 YOGO Pet。</p>
+    <section class="guide-method"><h3 data-i18n="方法二：从设置进入">方法二：从设置进入</h3>
+      <div class="settings-guide" role="img" aria-label="设置路径：Settings，Coding，Hooks" data-i18n-aria-label="设置路径：Settings，Coding，Hooks"><div class="guide-settings-label">⚙ Settings</div><div class="guide-coding-label">Coding</div><div class="guide-hooks-label">⚓ Hooks <span>→</span></div></div>
+      <p><span data-i18n="在 ChatGPT 客户端打开">在 ChatGPT 客户端打开</span> <strong>Settings → Coding → Hooks</strong><span data-i18n="，找到 YogoSync。">，找到 YogoSync。</span></p>
     </section>
     </section>
     <section id="guide-panel-cli" role="tabpanel" aria-labelledby="guide-tab-cli" hidden>
-      <p class="guide-result">审阅并信任 YOGO 的事件</p>
-      <section class="guide-method"><h3><span>1</span> 在终端启动 Codex</h3><pre class="guide-command"><code>codex</code></pre></section>
-      <section class="guide-method"><h3><span>2</span> 输入命令，打开 Hooks</h3><pre class="guide-command"><code>/hooks</code></pre></section>
+      <p class="guide-result" data-i18n="审阅并信任 YOGO 的事件">审阅并信任 YOGO 的事件</p>
+      <section class="guide-method"><h3><span>1</span> <span data-i18n="在终端启动 Codex">在终端启动 Codex</span></h3><pre class="guide-command"><code>codex</code></pre></section>
+      <section class="guide-method"><h3><span>2</span> <span data-i18n="输入命令，打开 Hooks">输入命令，打开 Hooks</span></h3><pre class="guide-command"><code>/hooks</code></pre></section>
     </section>
   </div>
-  <footer class="guide-footer"><button id="guide-done" class="primary">我已授权，检查连接</button></footer>
-</dialog><script src="codex-connection.js"></script></body></html>
+  <footer class="guide-footer"><button id="guide-done" class="primary" data-i18n="我已授权，检查连接">我已授权，检查连接</button></footer>
+</dialog><script src="i18n.js" data-scripts="window-actions.js,glow.js,app.js,codex-connection.js"></script></body></html>

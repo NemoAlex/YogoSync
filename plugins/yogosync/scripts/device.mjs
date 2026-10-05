@@ -37,9 +37,14 @@ export class YogoDevice {
   async begin(saveBackup) {
     const original = await this.readDotBlock();
     if (original.length !== 24) throw new Error('点阵配置长度不正确');
-    if (original[6] === 6) throw new Error('当前已是自定义模式，无法备份原图案。请先在 ATK 选择一个预设灯效后重试。');
-    this.original = original;
-    await saveBackup?.({ vendorId: VID, productId: PID, serialNumber: this.info.serialNumber, block: [...original] });
+    const recovery = Buffer.from(original);
+    if (recovery[6] === 6) {
+      recovery[5] = 0; recovery[6] = 0;
+      if (!recovery[7]) recovery[7] = 50;
+      if (recovery.subarray(11,14).every(v=>v===0)) recovery.fill(255,11,14);
+    }
+    this.original = recovery;
+    await saveBackup?.({ vendorId: VID, productId: PID, serialNumber: this.info.serialNumber, block: [...recovery] });
     const changed = Buffer.from(original);
     changed[5] = 0; changed[6] = 6; // only dot on/off, mode; retain brightness and every other field
     await this.request(0x3d);

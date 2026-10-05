@@ -57,9 +57,9 @@ pub fn open_settings(app: tauri::AppHandle) -> Result<(), String> {
         "settings",
         tauri::WebviewUrl::App("settings.html".into()),
     )
-    .title("YOGO Pet 设置")
-    .inner_size(460.0, 300.0)
-    .min_inner_size(420.0, 280.0)
+    .title(crate::i18n::t("YogoSync 设置"))
+    .inner_size(460.0, 370.0)
+    .min_inner_size(420.0, 350.0)
     .build()
     .map_err(|e| e.to_string())?;
     Ok(())
@@ -69,52 +69,13 @@ pub fn quit_app(app: tauri::AppHandle) {
     super::quit(app)
 }
 #[tauri::command]
-pub async fn export_plugin(app: tauri::AppHandle) -> Result<String, String> {
-    let resource = app.path().resource_dir().map_err(|e| e.to_string())?;
-    tauri::async_runtime::spawn_blocking(move || {
-        let root = yogo_core::config_store::data_dir().join("native-plugin/yogo-pet");
-        for part in [".codex-plugin", "hooks", "bin"] {
-            yogo_core::events::private_dir(&root.join(part))?;
-        }
-        let binary = if cfg!(windows) {
-            "yogo-pet-hook.exe"
-        } else {
-            "yogo-pet-hook"
-        };
-        let source = resource.join("resources").join(binary);
-        std::fs::copy(&source, root.join("bin").join(binary))
-            .map_err(|e| format!("无法导出事件助手：{e}"))?;
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(
-                root.join("bin").join(binary),
-                std::fs::Permissions::from_mode(0o755),
-            )
-            .map_err(|e| e.to_string())?;
-        }
-        let manifest = include_str!("../resources/plugin.json");
-        std::fs::write(root.join(".codex-plugin/plugin.json"), manifest)
-            .map_err(|e| e.to_string())?;
-        std::fs::write(
-            root.join("hooks/hooks.json"),
-            include_str!("../resources/hooks.json"),
-        )
-        .map_err(|e| e.to_string())?;
-        Ok(root.display().to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())?
-}
-
-#[tauri::command]
 pub fn open_themes(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("themes") {
         w.show().map_err(|e| e.to_string())?;
         return w.set_focus().map_err(|e| e.to_string());
     }
     tauri::WebviewWindowBuilder::new(&app, "themes", tauri::WebviewUrl::App("themes.html".into()))
-        .title("YOGO Pet · 主题")
+        .title(crate::i18n::t("YogoSync · 主题"))
         .inner_size(920.0, 760.0)
         .min_inner_size(800.0, 650.0)
         .build()
@@ -140,7 +101,7 @@ pub async fn activate_theme(runtime: State<'_, ServiceRuntime>, id: String) -> R
 pub async fn import_theme() -> Result<Option<yogo_core::themes::Theme>, String> {
     tauri::async_runtime::spawn_blocking(|| {
         let Some(path) = rfd::FileDialog::new()
-            .add_filter("YOGO 主题", &["json"])
+            .add_filter(crate::i18n::t("YOGO 主题"), &["json"])
             .pick_file()
         else {
             return Ok(None);
@@ -153,7 +114,7 @@ pub async fn import_theme() -> Result<Option<yogo_core::themes::Theme>, String> 
             .read_to_end(&mut bytes)
             .map_err(|e| e.to_string())?;
         if bytes.len() > 2_000_000 {
-            return Err("主题文件不能超过 2 MB".into());
+            return Err(crate::i18n::t("主题文件不能超过 2 MB").into());
         }
         let mut theme: yogo_core::themes::Theme =
             serde_json::from_slice(&bytes).map_err(|e| format!("主题文件格式无效：{e}"))?;
@@ -174,7 +135,7 @@ pub async fn export_theme(theme: yogo_core::themes::Theme) -> Result<bool, Strin
             .filter(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
             .collect();
         let Some(path) = rfd::FileDialog::new()
-            .add_filter("YOGO 主题", &["json"])
+            .add_filter(crate::i18n::t("YOGO 主题"), &["json"])
             .set_file_name(format!("{name}.yogo.json"))
             .save_file()
         else {
@@ -209,16 +170,73 @@ pub fn set_unsaved_changes(window: tauri::WebviewWindow, app: tauri::AppHandle, 
 pub async fn confirm_discard_changes() -> Result<bool, String> {
     tauri::async_runtime::spawn_blocking(|| {
         let result = rfd::MessageDialog::new()
-            .set_title("放弃未保存的修改？")
-            .set_description("关闭窗口后将丢失这些修改。")
+            .set_title(crate::i18n::t("放弃未保存的修改？"))
+            .set_description(crate::i18n::t("关闭窗口后将丢失这些修改。"))
             .set_buttons(rfd::MessageButtons::OkCancelCustom(
-                "放弃修改".into(),
-                "继续编辑".into(),
+                crate::i18n::t("放弃修改").into(),
+                crate::i18n::t("继续编辑").into(),
             ))
             .show();
         result == rfd::MessageDialogResult::Ok
-            || result == rfd::MessageDialogResult::Custom("放弃修改".into())
+            || result == rfd::MessageDialogResult::Custom(crate::i18n::t("放弃修改").into())
     })
     .await
     .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn set_preview_cover(
+    runtime: State<'_, ServiceRuntime>,
+    color: String,
+) -> Result<(), String> {
+    run(runtime.inner().clone(), move |r| r.set_preview_cover(color)).await
+}
+
+#[tauri::command]
+pub async fn get_autostart(app: tauri::AppHandle) -> Result<bool, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use tauri_plugin_autostart::ManagerExt;
+        app.autolaunch().is_enabled().map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+#[tauri::command]
+pub async fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<bool, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use tauri_plugin_autostart::ManagerExt;
+        let manager = app.autolaunch();
+        if enabled {
+            manager.enable()
+        } else {
+            manager.disable()
+        }
+        .map_err(|e| e.to_string())?;
+        let actual = manager.is_enabled().map_err(|e| e.to_string())?;
+        if actual != enabled {
+            return Err(crate::i18n::t("系统自动启动设置未生效，请重试").into());
+        }
+        Ok(actual)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn open_atk_driver() -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        const URL: &str = "https://hub.atk.pro/";
+        #[cfg(target_os = "macos")]
+        let result = std::process::Command::new("open").arg(URL).status();
+        #[cfg(windows)]
+        let result = std::process::Command::new("explorer.exe").arg(URL).status();
+        #[cfg(not(any(target_os = "macos", windows)))]
+        let result = std::process::Command::new("xdg-open").arg(URL).status();
+        match result {
+            Ok(status) if status.success() => Ok(()),
+            _ => Err("无法打开浏览器：https://hub.atk.pro/".into()),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }

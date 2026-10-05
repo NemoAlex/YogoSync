@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "YOGO Pet",
+  "productName": "YogoSync",
   "version": "1.0.0",
-  "identifier": "dev.yogopet.desktop",
+  "identifier": "dev.yogosync.desktop",
   "build": {
     "frontendDist": "../desktop"
   },
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "YOGO Pet",
+        "title": "YogoSync",
         "width": 410,
         "height": 680,
         "minWidth": 380,

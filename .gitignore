@@ -3,7 +3,7 @@ node_modules/
 dist/
 *.log
 target/
-src-tauri/resources/yogo-pet-hook*
+src-tauri/resources/yogosync-hook*
 src-tauri/gen/
 
 .DS_Store

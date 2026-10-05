@@ -6,8 +6,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：会话开始时初始化待机状态"
           }
@@ -19,8 +17,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：收到消息时显示思考图标"
           }
@@ -32,8 +28,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：调用工具时显示执行图标"
           }
@@ -45,8 +39,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：工具结束后更新思考或执行状态"
           }
@@ -58,8 +50,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：需要授权时显示等待确认图标"
           }
@@ -71,8 +61,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：本轮回复完成时显示完成图标"
           }
@@ -84,8 +72,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：任务被打断时显示中断图标"
           }
@@ -97,8 +83,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/bin/yogo-pet-hook\"",
-            "commandWindows": "\"%PLUGIN_ROOT%/bin/yogo-pet-hook.exe\"",
             "timeout": 3,
             "statusMessage": "YOGO：会话结束时清除该任务状态"
           }

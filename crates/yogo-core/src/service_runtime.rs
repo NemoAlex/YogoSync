@@ -52,6 +52,7 @@ enum Action {
     Demo(PetState),
     Auto,
     Save(Preferences),
+    PreviewCover(String),
     ClearLogs,
     SaveTheme(Theme),
     ActivateTheme(String),
@@ -94,7 +95,7 @@ impl ServiceRuntime {
             .open(store.dir.join("desktop.lock"))
             .map_err(|e| e.to_string())?;
         lock.try_lock_exclusive()
-            .map_err(|_| "YOGO Pet 桌面服务已在运行".to_string())?;
+            .map_err(|_| "YogoSync 桌面服务已在运行".to_string())?;
         let preferences = store.load()?;
         let themes = ThemeLibrary::load(&store.dir)?;
         let local = DesktopSnapshot {
@@ -161,6 +162,9 @@ impl ServiceRuntime {
     }
     pub fn save(&self, p: Preferences) -> Result<(), String> {
         self.request(Action::Save(p))
+    }
+    pub fn set_preview_cover(&self, color: String) -> Result<(), String> {
+        self.request(Action::PreviewCover(color))
     }
     pub fn save_theme(&self, theme: Theme) -> Result<(), String> {
         self.request(Action::SaveTheme(theme))
@@ -284,11 +288,7 @@ impl Worker {
     }
     fn run(&mut self, receiver: Receiver<Request>) {
         self.record("info", "桌面服务就绪 · 仅接收任务状态，不读取对话正文");
-        if self.local.preferences.auto_connect {
-            if let Err(e) = self.start() {
-                self.fail(e)
-            }
-        }
+
         loop {
             match receiver.recv_timeout(
                 self.next_frame
@@ -312,10 +312,18 @@ impl Worker {
                             self.demo = None;
                             Ok(())
                         }
-                        Action::Save(p) => self.store.save(&p).map(|_| {
-                            self.local.preferences = p;
-                            self.record("info", "设置已保存");
-                        }),
+                        Action::Save(mut p) => {
+                            p.preview_cover = self.local.preferences.preview_cover.clone();
+                            self.store.save(&p).map(|_| {
+                                self.local.preferences = p;
+                                self.record("info", "设置已保存");
+                            })
+                        }
+                        Action::PreviewCover(color) => {
+                            let mut p = self.local.preferences.clone();
+                            p.preview_cover = color;
+                            self.store.save(&p).map(|_| self.local.preferences = p)
+                        }
                         Action::SaveTheme(theme) => {
                             let updates_active = theme.id == self.themes.active_id;
                             self.themes.upsert(theme, &self.store.dir).map(|_| {
@@ -358,7 +366,7 @@ impl Worker {
             if let Err(e) = self.tick() {
                 self.device = None;
                 self.local.model.clear();
-                if self.local.error != e {
+                        if self.local.error != e {
                     self.fail(e)
                 }
             }
